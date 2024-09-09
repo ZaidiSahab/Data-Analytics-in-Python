@@ -1,0 +1,222 @@
+import tkinter as tk
+from tkinter import ttk, messagebox
+import mysql.connector
+
+# Function to connect to the database
+def connect_to_database():
+    try:
+        connection = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="adv_python"
+        )
+        return connection
+    except mysql.connector.Error as err:
+        messagebox.showerror("Connection Error", f"Error: {err}")
+        return None
+
+# Function to insert data into the database (Create)
+def insert_data():
+    name = entry_name.get()
+    father_name = entry_father_name.get()
+    course = entry_course.get()
+    lab_no = entry_lab_no.get()
+
+    if name and father_name and course and lab_no:
+        connection = connect_to_database()
+        if connection:
+            cursor = connection.cursor()
+            try:
+                cursor.execute("INSERT INTO student_record (Name, Father_Name, Course, Lab_No) VALUES (%s, %s, %s, %s)",
+                               (name, father_name, course, lab_no))
+                connection.commit()
+                messagebox.showinfo("Success", "Data inserted successfully!")
+                clear_fields()
+                fetch_data()  # Refresh the data in Treeview
+            except mysql.connector.Error as err:
+                messagebox.showerror("Error", f"Failed to insert data: {err}")
+            finally:
+                cursor.close()
+                connection.close()
+        else:
+            messagebox.showerror("Error", "Failed to connect to the database.")
+    else:
+        messagebox.showwarning("Input Error", "All fields are required!")
+
+# Function to fetch data from the database (Read)
+def fetch_data():
+    connection = connect_to_database()
+    if connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute("SELECT * FROM student_record")
+            rows = cursor.fetchall()
+            tree.delete(*tree.get_children())  # Clear the Treeview
+            for row in rows:
+                tree.insert("", "end", values=row)
+        except mysql.connector.Error as err:
+            messagebox.showerror("Error", f"Failed to fetch data: {err}")
+        finally:
+            cursor.close()
+            connection.close()
+
+# Function to update a selected record (Update)
+def update_data():
+    selected_item = tree.selection()
+    if selected_item:
+        # Retrieve values from entry fields
+        name = entry_name.get()
+        father_name = entry_father_name.get()
+        course = entry_course.get()
+        lab_no = entry_lab_no.get()
+
+        # Check if all fields are filled
+        if name and father_name and course and lab_no:
+            connection = connect_to_database()
+            if connection:
+                cursor = connection.cursor()
+                try:
+                    # Get the current name of the selected item (used as identifier)
+                    current_name = tree.item(selected_item, 'values')[1]
+
+                    # Update query using the selected Name (as the identifier)
+                    cursor.execute("""
+                        UPDATE student_record
+                        SET Name=%s, Father_Name=%s, Course=%s, Lab_No=%s
+                        WHERE Name=%s
+                    """, (name, father_name, course, lab_no, current_name))
+
+                    connection.commit()
+                    messagebox.showinfo("Success", "Data updated successfully!")
+                    clear_fields()
+                    fetch_data()  # Refresh the data in Treeview
+                except mysql.connector.Error as err:
+                    messagebox.showerror("Error", f"Failed to update data: {err}")
+                finally:
+                    cursor.close()
+                    connection.close()
+            else:
+                messagebox.showerror("Error", "Failed to connect to the database.")
+        else:
+            messagebox.showwarning("Input Error", "All fields are required!")
+    else:
+        messagebox.showwarning("Selection Error", "Please select a record to update.")
+
+# Function to delete a selected record (Delete)
+def delete_data():
+    selected_item = tree.selection()
+    if selected_item:
+        connection = connect_to_database()
+        if connection:
+            cursor = connection.cursor()
+            try:
+                # Get the name of the selected item (used as identifier)
+                selected_name = tree.item(selected_item, 'values')[1]
+
+                # Delete query using the selected Name (as the identifier)
+                cursor.execute("DELETE FROM student_record WHERE Name=%s", (selected_name,))
+                connection.commit()
+                messagebox.showinfo("Success", "Data deleted successfully!")
+                fetch_data()  # Refresh the data in Treeview
+            except mysql.connector.Error as err:
+                messagebox.showerror("Error", f"Failed to delete data: {err}")
+            finally:
+                cursor.close()
+                connection.close()
+        else:
+            messagebox.showerror("Error", "Failed to connect to the database.")
+    else:
+        messagebox.showwarning("Selection Error", "Please select a record to delete.")
+
+# Function to clear input fields
+def clear_fields():
+    entry_name.delete(0, tk.END)
+    entry_father_name.delete(0, tk.END)
+    entry_course.delete(0, tk.END)
+    entry_lab_no.delete(0, tk.END)
+
+# Function to fill entry fields with selected row data
+def fill_fields(event):
+    selected_item = tree.selection()
+    if selected_item:
+        selected = tree.item(selected_item, 'values')
+        entry_name.delete(0, tk.END)
+        entry_name.insert(0, selected[1])
+        entry_father_name.delete(0, tk.END)
+        entry_father_name.insert(0, selected[2])
+        entry_course.delete(0, tk.END)
+        entry_course.insert(0, selected[3])
+        entry_lab_no.delete(0, tk.END)
+        entry_lab_no.insert(0, selected[4])
+
+# Create the main window
+root = tk.Tk()
+root.title("Simple MySQL Tkinter App with CRUD")
+root.geometry("600x500")  # Set a reasonable window size
+
+# Load the image
+image_path = (r"C:\Users\pc\Desktop\Windows-11-PRO.png")
+image = tk.PhotoImage(file=image_path)
+
+# Create a canvas and add the image to the canvas
+canvas = tk.Canvas(root, width=600, height=150)
+canvas.grid(row=0, columnspan=4)
+canvas.create_image(300, 75, image=image)  # Adjust image positioning
+
+# Create labels and entry fields
+tk.Label(root, text="Name:").grid(row=1, column=0, padx=10, pady=5, sticky=tk.W)
+entry_name = tk.Entry(root)
+entry_name.grid(row=1, column=1, padx=10, pady=5)
+
+tk.Label(root, text="Father Name:").grid(row=2, column=0, padx=10, pady=5, sticky=tk.W)
+entry_father_name = tk.Entry(root)
+entry_father_name.grid(row=2, column=1, padx=10, pady=5)
+
+tk.Label(root, text="Course:").grid(row=3, column=0, padx=10, pady=5, sticky=tk.W)
+entry_course = tk.Entry(root)
+entry_course.grid(row=3, column=1, padx=10, pady=5)
+
+tk.Label(root, text="Lab No:").grid(row=4, column=0, padx=10, pady=5, sticky=tk.W)
+entry_lab_no = tk.Entry(root)
+entry_lab_no.grid(row=4, column=1, padx=10, pady=5)
+
+# Create CRUD buttons
+submit_button = tk.Button(root, text="Submit", command=insert_data)
+submit_button.grid(row=5, column=0, pady=10)
+
+update_button = tk.Button(root, text="Update", command=update_data)
+update_button.grid(row=5, column=1, pady=10)
+
+delete_button = tk.Button(root, text="Delete", command=delete_data)
+delete_button.grid(row=5, column=2, pady=10)
+
+clear_button = tk.Button(root, text="Clear", command=clear_fields)
+clear_button.grid(row=5, column=3, pady=10)
+
+# Create Treeview to display data (Read)
+tree = ttk.Treeview(root, columns=("ID", "Name", "Father Name", "Course", "Lab No"), show="headings")
+tree.grid(row=6, columnspan=4, padx=10, pady=10, sticky=tk.W+tk.E)
+
+# Define column headings
+tree.heading("ID", text="ID")
+tree.heading("Name", text="Name")
+tree.heading("Father Name", text="Father Name")
+tree.heading("Course", text="Course")
+tree.heading("Lab No", text="Lab No")
+
+# Set column widths
+tree.column("ID", width=50)
+tree.column("Name", width=150)
+tree.column("Father Name", width=150)
+tree.column("Course", width=100)
+tree.column("Lab No", width=100)
+
+# Bind the Treeview select event to fill entry fields
+tree.bind("<<TreeviewSelect>>", fill_fields)
+
+# Fetch and display data in Treeview
+fetch_data()
+
+# Run the application
+root.mainloop()
