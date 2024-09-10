@@ -1,0 +1,255 @@
+import tkinter as tk
+from tkinter import ttk, messagebox
+import mysql.connector
+from can import tree
+
+
+# Function to connect to the database
+def connect_to_database():
+    try:
+        connection = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="salesdistribution"
+        )
+        return connection
+    except mysql.connector.Error as err:
+        messagebox.showerror("Connection Error", f"Error: {err}")
+        return None
+
+# Function to insert data into the database (Create)
+def insert_data():
+    s_no = entry_sno.get()
+    party_name = entry_party_name.get()
+    product_name = entry_product_name.get()
+    quantity = float(entry_quantity.get())
+    unit = float(entry_unit.get())
+
+    # Calculate total and discount
+    total = quantity * unit
+    discount = 0.1 if total > 2000 else 0
+    net = total * (1 - discount)
+
+    if s_no and party_name and product_name and quantity and unit:
+        connection = connect_to_database()
+        if connection:
+            cursor = connection.cursor()
+            try:
+                cursor.execute(
+                    "INSERT INTO record (s_no, party_name, product_name, quantity, unit, total, discount, net) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                    (s_no, party_name, product_name, quantity, unit, total, discount * 100, net)
+                )
+                connection.commit()
+                messagebox.showinfo("Success", "Data inserted successfully!")
+                clear_fields()
+                fetch_data()  # Refresh the data in Treeview
+            except mysql.connector.Error as err:
+                messagebox.showerror("Error", f"Failed to insert data: {err}")
+            finally:
+                cursor.close()
+                connection.close()
+        else:
+            messagebox.showerror("Error", "Failed to connect to the database.")
+    else:
+        messagebox.showwarning("Input Error", "All fields are required!")
+
+# Function to update a selected record (Update)
+def update_data():
+    selected_item = tree.selection()
+    if selected_item:
+        # Retrieve values from entry fields
+        s_no = entry_sno.get()
+        party_name = entry_party_name.get()
+        product_name = entry_product_name.get()
+        quantity = float(entry_quantity.get())
+        unit = float(entry_unit.get())
+
+        # Calculate total and discount
+        total = quantity * unit
+        discount = 0.1 if total > 2000 else 0
+        net = total * (1 - discount)
+
+        # Check if all fields are filled
+        if s_no and party_name and product_name and quantity and unit:
+            connection = connect_to_database()
+            if connection:
+                cursor = connection.cursor()
+                try:
+                    # Get the current s_no of the selected item (used as identifier)
+                    current_s_no = tree.item(selected_item, 'values')[0]
+
+                    # Update query using the selected s_no (as the identifier)
+                    cursor.execute("""
+                        UPDATE record
+                        SET s_no=%s, party_name=%s, product_name=%s, quantity=%s, unit=%s, total=%s, discount=%s, net=%s
+                        WHERE s_no=%s
+                    """, (s_no, party_name, product_name, quantity, unit, total, discount * 100, net, current_s_no))
+
+                    connection.commit()
+                    messagebox.showinfo("Success", "Data updated successfully!")
+                    clear_fields()
+                    fetch_data()  # Refresh the data in Treeview
+                except mysql.connector.Error as err:
+                    messagebox.showerror("Error", f"Failed to update data: {err}")
+                finally:
+                    cursor.close()
+                    connection.close()
+            else:
+                messagebox.showerror("Error", "Failed to connect to the database.")
+        else:
+            messagebox.showwarning("Input Error", "All fields are required!")
+    else:
+        messagebox.showwarning("Selection Error", "Please select a record to update.")
+
+# Function to fetch data from the database (Read)
+def fetch_data():
+    connection = connect_to_database()
+    if connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute("SELECT * FROM record")
+            rows = cursor.fetchall()
+            tree.delete(*tree.get_children())  # Clear the Treeview
+            for row in rows:
+                tree.insert("", "end", values=row)
+        except mysql.connector.Error as err:
+            messagebox.showerror("Error", f"Failed to fetch data: {err}")
+        finally:
+            cursor.close()
+            connection.close()
+
+# Function to delete a selected record (Delete)
+def delete_data():
+    selected_item = tree.selection()
+    if selected_item:
+        connection = connect_to_database()
+        if connection:
+            cursor = connection.cursor()
+            try:
+                # Get the s_no of the selected item (used as identifier)
+                selected_s_no = tree.item(selected_item, 'values')[0]
+
+                # Delete query using the selected s_no (as the identifier)
+                cursor.execute("DELETE FROM record WHERE s_no=%s", (selected_s_no,))
+                connection.commit()
+                messagebox.showinfo("Success", "Data deleted successfully!")
+                fetch_data()  # Refresh the data in Treeview
+            except mysql.connector.Error as err:
+                messagebox.showerror("Error", f"Failed to delete data: {err}")
+            finally:
+                cursor.close()
+                connection.close()
+        else:
+            messagebox.showerror("Error", "Failed to connect to the database.")
+    else:
+        messagebox.showwarning("Selection Error", "Please select a record to delete.")
+
+# Function to clear input fields
+def clear_fields():
+    entry_sno.delete(0, tk.END)
+    entry_party_name.delete(0, tk.END)
+    entry_product_name.delete(0, tk.END)
+    entry_quantity.delete(0, tk.END)
+    entry_unit.delete(0, tk.END)
+    entry_total.delete(0, tk.END)
+    entry_discount.delete(0, tk.END)
+    entry_net.delete(0, tk.END)
+
+# Function to fill entry fields with selected row data
+def fill_fields(event):
+    selected_item = tree.selection()
+    if selected_item:
+        selected = tree.item(selected_item, 'values')
+        entry_sno.delete(0, tk.END)
+        entry_sno.insert(0, selected[0])
+        entry_party_name.delete(0, tk.END)
+        entry_party_name.insert(0, selected[1])
+        entry_product_name.delete(0, tk.END)
+        entry_product_name.insert(0, selected[2])
+        entry_quantity.delete(0, tk.END)
+        entry_quantity.insert(0, selected[3])
+        entry_unit.delete(0, tk.END)
+        entry_unit.insert(0, selected[4])
+        entry_total.delete(0, tk.END)
+        entry_total.insert(0, selected[5])
+        entry_discount.delete(0, tk.END)
+        entry_discount.insert(0, selected[6])
+        entry_net.delete(0, tk.END)
+        entry_net.insert(0, selected[7])
+
+# Create the main window
+root = tk.Tk()
+root.title("Sales Distribution CRUD App")
+root.geometry("800x600")  # Set a reasonable window size
+
+# Create labels and entry fields
+tk.Label(root, text="S. No:").grid(row=1, column=0, padx=10, pady=5, sticky=tk.W)
+entry_sno = tk.Entry(root)
+entry_sno.grid(row=1, column=1, padx=10, pady=5)
+
+tk.Label(root, text="Party Name:").grid(row=2, column=0, padx=10, pady=5, sticky=tk.W)
+entry_party_name = tk.Entry(root)
+entry_party_name.grid(row=2, column=1, padx=10, pady=5)
+
+tk.Label(root, text="Product Name:").grid(row=3, column=0, padx=10, pady=5, sticky=tk.W)
+entry_product_name = tk.Entry(root)
+entry_product_name.grid(row=3, column=1, padx=10, pady=5)
+
+tk.Label(root, text="Quantity:").grid(row=4, column=0, padx=10, pady=5, sticky=tk.W)
+entry_quantity = tk.Entry(root)
+entry_quantity.grid(row=4, column=1, padx=10, pady=5)
+
+tk.Label(root, text="Unit:").grid(row=5, column=0, padx=10, pady=5, sticky=tk.W)
+entry_unit = tk.Entry(root)
+entry_unit.grid(row=5, column=1, padx=10, pady=5)
+
+tk.Label(root, text="Total:").grid(row=6, column=0, padx=10, pady=5, sticky=tk.W)
+entry_total = tk.Entry(root)
+entry_total.grid(row=6, column=1, padx=10, pady=5)
+tk.Label(root, text="Discount:").grid(row=7, column=0, padx=10, pady=5, sticky=tk.W)
+entry_discount = tk.Entry(root)
+entry_discount.grid(row=7, column=1, padx=10, pady=5)
+
+tk.Label(root, text="Net:").grid(row=8, column=0, padx=10, pady=5, sticky=tk.W)
+entry_net = tk.Entry(root)
+entry_net.grid(row=8, column=1, padx=10, pady=5)
+
+# Create Buttons for CRUD Operations
+tk.Button(root, text="Insert", command=insert_data).grid(row=9, column=0, padx=10, pady=10)
+tk.Button(root, text="Update", command=update_data).grid(row=9, column=1, padx=10, pady=10)
+tk.Button(root, text="Delete", command=delete_data).grid(row=9, column=2, padx=10, pady=10)
+tk.Button(root, text="Clear", command=clear_fields).grid(row=9, column=3, padx=10, pady=10)
+
+# Treeview to display data from the database
+tree = ttk.Treeview(root, columns=("S. No", "Party Name", "Product Name", "Quantity", "Unit", "Total", "Discount", "Net"), show="headings")
+tree.grid(row=10, column=0, columnspan=4, padx=10, pady=10)
+
+# Define column headings
+tree.heading("S. No", text="S. No")
+tree.heading("Party Name", text="Party Name")
+tree.heading("Product Name", text="Product Name")
+tree.heading("Quantity", text="Quantity")
+tree.heading("Unit", text="Unit")
+tree.heading("Total", text="Total")
+tree.heading("Discount", text="Discount (%)")
+tree.heading("Net", text="Net")
+
+# Define column widths
+tree.column("S. No", width=50)
+tree.column("Party Name", width=150)
+tree.column("Product Name", width=150)
+tree.column("Quantity", width=100)
+tree.column("Unit", width=100)
+tree.column("Total", width=100)
+tree.column("Discount", width=100)
+tree.column("Net", width=100)
+
+# Bind the Treeview selection event to fill entry fields
+tree.bind("<<TreeviewSelect>>", fill_fields)
+
+# Fetch data to populate the Treeview
+fetch_data()
+
+# Start the main event loop
+root.mainloop()
