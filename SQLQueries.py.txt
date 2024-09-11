@@ -1,0 +1,720 @@
+SQL Qwery 
+
+CREATE DATABASE: Creates a new database.
+
+
+
+CREATE
+DATABASE database_name;
+
+
+CREATE TABLE: Creates a new table in the
+database.
+
+
+
+ 
+
+
+CREATE TABLE
+table_name (
+
+
+  column1 datatype constraints,
+
+
+  column2 datatype constraints,
+
+
+  ...
+
+
+);
+
+
+ALTER TABLE: Modifies an existing table.
+
+Add a column:
+
+
+
+
+ALTER TABLE
+table_name ADD column_name datatype;
+
+
+
+Modify a column:
+
+
+
+
+ 
+
+
+ 
+
+
+ALTER TABLE
+table_name MODIFY column_name datatype;
+
+
+
+Drop a column:
+
+
+
+
+ 
+
+
+ALTER TABLE
+table_name DROP COLUMN column_name;
+
+
+DROP DATABASE: Deletes an existing database.
+
+
+
+ 
+
+
+ 
+
+
+ 
+
+
+ 
+
+
+DROP
+DATABASE database_name;
+
+
+DROP TABLE: Deletes an existing table.
+
+
+
+ 
+
+
+DROP TABLE
+table_name;
+
+
+TRUNCATE TABLE: Removes all rows from a table
+without deleting the table.
+
+
+
+ 
+
+
+TRUNCATE
+TABLE table_name;
+
+
+RENAME TABLE: Renames an existing table.
+
+
+
+ 
+
+
+RENAME TABLE
+old_table_name TO new_table_name;
+
+
+2. Data
+Manipulation Language (DML)
+
+
+SELECT: Retrieves data from one or
+more tables.
+
+
+
+ 
+
+
+SELECT
+column1, column2 FROM table_name WHERE condition;
+
+
+SELECT *
+FROM table_name;
+
+
+INSERT INTO: Inserts new data into a table.
+
+
+
+ 
+
+
+INSERT INTO
+table_name (column1, column2, ...) VALUES (value1, value2, ...);
+
+
+UPDATE: Modifies existing data within
+a table.
+
+
+
+ 
+
+
+UPDATE
+table_name SET column1 = value1, column2 = value2 WHERE condition;
+
+
+DELETE FROM: Deletes data from a table.
+
+
+
+ 
+
+
+DELETE FROM
+table_name WHERE condition;
+
+
+3. Data
+Control Language (DCL)
+
+
+GRANT: Gives a user privileges on the
+database.
+
+
+
+GRANT
+privilege ON object TO user;
+
+
+REVOKE: Removes user privileges.
+
+
+
+ 
+
+
+REVOKE
+privilege ON object FROM user;
+
+
+4.
+Transaction Control Language (TCL)
+
+
+COMMIT: Saves all changes made in the
+current transaction.
+
+
+
+ 
+
+
+ 
+
+
+ 
+
+
+ 
+
+
+COMMIT;
+
+
+ROLLBACK: Undoes changes made in the
+current transaction.
+
+
+
+ROLLBACK;
+
+
+SAVEPOINT: Sets a savepoint within a
+transaction.
+
+
+
+ 
+
+
+SAVEPOINT
+savepoint_name;
+
+
+RELEASE SAVEPOINT: Removes a savepoint.
+
+
+
+ 
+
+
+RELEASE
+SAVEPOINT savepoint_name;
+
+
+5. Data
+Query Language (DQL)
+
+
+SELECT: Used to query the database.
+
+
+
+ 
+
+
+SELECT
+column_name FROM table_name WHERE condition;
+
+
+6. Joins
+and Subqueries
+
+
+INNER JOIN: Retrieves records that have
+matching values in both tables.
+
+
+
+ 
+
+
+SELECT
+columns FROM table1
+
+
+INNER JOIN
+table2 ON table1.column = table2.column;
+
+
+LEFT JOIN: Retrieves all records from the
+left table and matched records from the right table.
+
+
+
+ 
+
+
+SELECT
+columns FROM table1
+
+
+LEFT JOIN
+table2 ON table1.column = table2.column;
+
+
+RIGHT JOIN: Retrieves all records from the
+right table and matched records from the left table.
+
+
+
+ 
+
+
+SELECT
+columns FROM table1
+
+
+RIGHT JOIN
+table2 ON table1.column = table2.column;
+
+
+FULL JOIN: Retrieves all records when
+there is a match in either table.
+
+
+
+ 
+
+
+ 
+
+
+SELECT
+columns FROM table1
+
+
+FULL JOIN
+table2 ON table1.column = table2.column;
+
+
+CROSS JOIN: Returns the Cartesian product
+of the two tables.
+
+
+
+ 
+
+
+SELECT
+columns FROM table1
+
+
+CROSS JOIN
+table2;
+
+
+SELF JOIN: Joins a table to itself.
+
+
+
+ 
+
+
+SELECT
+columns FROM table1 alias1, table1 alias2 WHERE condition;
+
+
+SUBQUERY: A query within another query.
+
+
+
+ 
+
+
+SELECT
+columns FROM table_name
+
+
+WHERE
+column_name = (SELECT column FROM another_table WHERE condition);
+
+
+7.
+Indexes and Constraints
+
+
+CREATE INDEX: Creates an index on a table.
+
+
+
+ 
+
+
+CREATE INDEX
+index_name ON table_name (column_name);
+
+
+UNIQUE: Ensures that all values in a
+column are unique.
+
+
+
+ 
+
+
+CREATE TABLE
+table_name (
+
+
+  column_name datatype UNIQUE
+
+
+);
+
+
+PRIMARY KEY: A unique identifier for each
+record in a table.
+
+
+
+ 
+
+
+CREATE TABLE
+table_name (
+
+
+  column_name datatype PRIMARY KEY
+
+
+);
+
+
+FOREIGN KEY: A key used to link two tables.
+
+
+
+ 
+
+
+CREATE TABLE
+table_name (
+
+
+  column_name datatype,
+
+
+  FOREIGN KEY (column_name) REFERENCES
+another_table(column_name)
+
+
+);
+
+
+CHECK: Ensures that all values in a
+column satisfy a specific condition.
+
+
+
+ 
+
+
+CREATE TABLE
+table_name (
+
+
+  column_name datatype CHECK (condition)
+
+
+);
+
+
+DEFAULT: Provides a default value for a
+column.
+
+
+
+ 
+
+
+CREATE TABLE
+table_name (
+
+
+  column_name datatype DEFAULT default_value
+
+
+);
+
+
+8. Views
+
+
+CREATE VIEW: Creates a virtual table.
+
+
+
+ 
+
+
+CREATE VIEW
+view_name AS
+
+
+SELECT
+columns FROM table_name WHERE condition;
+
+
+DROP VIEW: Deletes a view.
+
+
+
+ 
+
+
+DROP VIEW
+view_name;
+
+
+9. Stored
+Procedures and Functions
+
+
+CREATE PROCEDURE: Defines a stored procedure.
+
+
+
+ 
+
+
+CREATE
+PROCEDURE procedure_name (parameters)
+
+
+BEGIN
+
+
+  SQL statements;
+
+
+END;
+
+
+CALL: Executes a stored procedure.
+
+
+
+ 
+
+
+CALL
+procedure_name(parameters);
+
+
+CREATE FUNCTION: Defines a function.
+
+
+
+ 
+
+
+CREATE
+FUNCTION function_name (parameters) RETURNS return_datatype
+
+
+BEGIN
+
+
+  SQL statements;
+
+
+END;
+
+
+DROP PROCEDURE: Deletes a stored procedure.
+
+
+
+ 
+
+
+DROP
+PROCEDURE procedure_name;
+
+
+DROP FUNCTION: Deletes a function.
+
+
+
+ 
+
+
+DROP
+FUNCTION function_name;
+
+
+10.
+Triggers
+
+
+CREATE TRIGGER: Automatically invokes SQL code
+in response to certain events on a table.
+
+
+
+ 
+
+
+CREATE
+TRIGGER trigger_name BEFORE/AFTER INSERT/UPDATE/DELETE ON table_name
+
+
+FOR EACH ROW
+
+
+BEGIN
+
+
+  SQL statements;
+
+
+END;
+
+
+DROP TRIGGER: Deletes a trigger.
+
+
+
+ 
+
+
+DROP TRIGGER
+trigger_name;
+
+
+11.
+Administrative Commands
+
+
+SHOW DATABASES: Lists all databases on the
+server.
+
+
+
+ 
+
+
+SHOW
+DATABASES;
+
+
+SHOW TABLES: Lists all tables in the
+current database.
+
+
+
+ 
+
+
+SHOW TABLES;
+
+
+DESCRIBE: Describes the structure of a
+table.
+
+
+
+ 
+
+
+ 
+
+
+DESCRIBE
+table_name;
+
+
+SHOW COLUMNS: Lists all columns in a table.
+
+
+
+ 
+
+
+ 
+
+
+SHOW COLUMNS
+FROM table_name;
+
+
+SHOW INDEX: Displays information about the
+indexes on a table.
+
+
+
+ 
+
+
+SHOW INDEX
+FROM table_name;
+
+
+EXPLAIN: Provides details about how SQL
+statements will be executed.
+
+
+
+ 
+
+
+EXPLAIN
+SELECT * FROM table_name;
