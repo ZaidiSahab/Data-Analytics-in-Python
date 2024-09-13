@@ -1,0 +1,22 @@
+pycharm terminal = 
+
+install django
+upgrade 
+dir
+.venv
+dir
+pyhton startproject nnn
+cd youexcel
+dir
+cd youexcel
+dir
+python manage.py 
+cd..
+python manage.py runserver77
+
+
+ 
+
+
+
+command prompt =

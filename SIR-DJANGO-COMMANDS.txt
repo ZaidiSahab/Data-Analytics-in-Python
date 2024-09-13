@@ -1,0 +1,358 @@
+django  project steps 
+Project: Simple To-Do List
+
+
+1. Install Django
+
+
+First, ensure you have Django installed in your environment.
+You can install it using pip:
+
+
+pip install django
+
+
+ 
+
+
+2. Create a Django Project
+
+
+Create a new project using the django-admin command:
+
+
+        
+I.           
+django-admin startproject
+todo_project
+
+
+       II.           
+cd todo_project
+
+
+ 
+
+
+3. Create a Django App
+
+
+Next, create an app within your project. Let’s name it tasks:
+
+
+python manage.py startapp tasks
+
+
+ 
+
+
+4. Set Up the Models
+
+
+In the tasks/models.py file, define a model for a task:
+
+
+ 
+
+
+from django.db import models
+
+
+ 
+
+
+class Task(models.Model):
+
+
+    title =
+models.CharField(max_length=200)
+
+
+    completed =
+models.BooleanField(default=False)
+
+
+ 
+
+
+    def __str__(self):
+
+
+        return
+self.title
+
+
+ 
+
+
+ 
+
+
+ 
+
+
+ 
+
+
+5. Configure the App
+
+
+Add tasks to the INSTALLED_APPS list in the todo_project/settings.py
+file:
+
+
+python
+
+
+Copy code
+
+
+INSTALLED_APPS = [
+
+
+    # other apps
+
+
+    'tasks',
+
+
+]
+
+
+ 
+
+
+6. Create and Apply Migrations
+
+
+To apply the model changes to the database, run the
+following commands:
+
+
+python manage.py makemigrations
+
+
+python manage.py migrate
+
+
+ 
+
+
+7. Create Views
+
+
+In tasks/views.py, create basic views for listing and
+creating tasks:
+
+
+ 
+
+
+from django.shortcuts import render, redirect
+
+
+from .models import Task
+
+
+ 
+
+
+def task_list(request):
+
+
+    tasks =
+Task.objects.all()
+
+
+    return
+render(request, 'tasks/task_list.html', {'tasks': tasks})
+
+
+ 
+
+
+def add_task(request):
+
+
+    if request.method
+== 'POST':
+
+
+        title =
+request.POST.get('title')
+
+
+        if title:
+
+
+            Task.objects.create(title=title)
+
+
+        return
+redirect('task_list')
+
+
+    return
+render(request, 'tasks/add_task.html')
+
+
+8. Set Up URLs
+
+
+In tasks/urls.py, define the URLs for the list and add
+views:
+
+
+ 
+
+
+from django.urls import path
+
+
+from . import views
+
+
+ 
+
+
+urlpatterns = [
+
+
+    path('',
+views.task_list, name='task_list'),
+
+
+    path('add/',
+views.add_task, name='add_task'),
+
+
+]
+
+
+Include the tasks URLs in the main todo_project/urls.py:
+
+
+python
+
+
+Copy code
+
+
+from django.contrib import admin
+
+
+from django.urls import path, include
+
+
+ 
+
+
+urlpatterns = [
+
+
+    path('admin/',
+admin.site.urls),
+
+
+    path('tasks/',
+include('tasks.urls')),
+
+
+]
+
+
+9. Create Templates
+
+
+Create templates for displaying the tasks and adding new
+tasks:
+
+
+tasks/templates/tasks/task_list.html:
+
+
+
+html
+
+
+Copy code
+
+
+<h1>To-Do List</h1>
+
+
+<ul>
+
+
+    {% for task in
+tasks %}
+
+
+    <li>{{
+task.title }} {% if task.completed %}(Completed){% endif %}</li>
+
+
+    {% endfor %}
+
+
+</ul>
+
+
+<a href="{% url 'add_task' %}">Add a new
+task</a>
+
+
+tasks/templates/tasks/add_task.html:
+
+
+
+html
+
+
+Copy code
+
+
+<h1>Add Task</h1>
+
+
+<form method="POST">
+
+
+    {% csrf_token %}
+
+
+    <input type="text"
+name="title" placeholder="Task title">
+
+
+    <button type="submit">Add
+Task</button>
+
+
+</form>
+
+
+<a href="{% url 'task_list' %}">Back to task
+list</a>
+
+
+10. Run the Project
+
+
+Finally, run the Django development server:
+
+
+ 
+
+
+python manage.py runserver
+
+Add class comment…
+
+
+Announcement: "https://usbwebserver.yura.mk.ua/"
+Dinash Maliya (techkguru)
+Created YesterdayYesterday
+https://usbwebserver.yura.mk.ua/
+
+Add class comment…
