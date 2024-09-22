@@ -1,0 +1,9 @@
+pip install django
+(For environmental variable)
+.\.venv\Scripts\activate
+django-admin --version
+django-admin startproject gold
+cd .\gold\
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
